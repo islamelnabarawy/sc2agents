@@ -39,7 +39,7 @@ class MoveToBeaconWrapper(object):
         obs, reward, done, info = self._env.step([_SELECT_ARMY, _SELECT_ALL])
         self.last_observation = obs
         obs = self._extract_observation(obs)
-        return self._extract_observation(obs)
+        return obs
 
     def step(self, action):
         action = self._translate_action(action)
