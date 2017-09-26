@@ -54,7 +54,7 @@ class MoveToBeaconWrapper(object):
             return [_NO_OP]
         player_relative = self.last_observation.observation["screen"][_PLAYER_RELATIVE]
         player_y, player_x = (player_relative == _PLAYER_FRIENDLY).nonzero()
-        if not player_y.any():
+        if not player_y.any() or not player_x.any():
             return [_NO_OP]
         player = (int(player_x.mean()), int(player_y.mean()))
         offset = 8
@@ -64,7 +64,7 @@ class MoveToBeaconWrapper(object):
             target[i] = player[i] + movement[i] * offset
             if target[i] < 0:
                 target[i] = 0
-            if target[i] > player_relative.shape[i]:
+            if target[i] >= player_relative.shape[i]:
                 target[i] = player_relative.shape[i] - 1
         return [_MOVE_SCREEN, _NOT_QUEUED, target]
 
