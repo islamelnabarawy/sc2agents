@@ -25,23 +25,23 @@ _NOT_QUEUED = [0]
 _ACTION_OFFSET = {1: (1, 0), 2: (-1, 0), 3: (0, 1), 4: (0, -1)}
 
 
-class MoveToBeaconWrapper(object):
+class MoveToBeaconWrapper(gym.Env):
     def __init__(self, visualize=False):
         self._env = gym.make("SC2MoveToBeacon-v0")
         self._env.visualize = visualize
-        screen_shape = self._env.observation_spec["screen"]
+        screen_shape = self._env.observation_spec["screen"][1:]
         self.action_space = spaces.Discrete(5)
         self.observation_space = spaces.Box(low=0, high=4, shape=screen_shape)
         self.last_observation = None
 
-    def reset(self):
+    def _reset(self):
         self._env.reset()
         obs, reward, done, info = self._env.step([_SELECT_ARMY, _SELECT_ALL])
         self.last_observation = obs
         obs = self._extract_observation(obs)
         return obs
 
-    def step(self, action):
+    def _step(self, action):
         action = self._translate_action(action)
         obs, reward, done, info = self._env.step(action)
         if obs is None:
@@ -50,13 +50,22 @@ class MoveToBeaconWrapper(object):
         obs = self._extract_observation(obs)
         return obs, reward, done, info
 
-    def _extract_observation(self, obs):
-        return obs.observation["screen"]
+    def close(self):
+        self._env.close()
+        super().close()
+
+    @staticmethod
+    def _extract_observation(obs):
+        return obs.observation["screen"][_PLAYER_RELATIVE]
+
+    @staticmethod
+    def _get_player_relative(obs):
+        return obs
 
     def _translate_action(self, action):
         if action == 0:
             return [_NO_OP]
-        player_relative = self._extract_observation(self.last_observation)[_PLAYER_RELATIVE]
+        player_relative = self._get_player_relative(self._extract_observation(self.last_observation))
         player_y, player_x = (player_relative == _PLAYER_FRIENDLY).nonzero()
         if not player_y.any() or not player_x.any():
             return [_NO_OP]
