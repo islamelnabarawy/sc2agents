@@ -10,12 +10,6 @@ __author__ = 'Islam Elnabarawy'
 FLAGS = flags.FLAGS
 
 
-def callback(lcl, glb):
-    # stop training if reward exceeds 199
-    is_solved = lcl['t'] > 100 and sum(lcl['episode_rewards'][-101:-1]) / 100 >= 199
-    return is_solved
-
-
 def main():
     FLAGS(sys.argv)
 
@@ -31,18 +25,29 @@ def main():
     act = deepq.learn(
         env,
         q_func=model,
-        lr=1e-3,
-        max_timesteps=100000,
-        buffer_size=50000,
-        exploration_fraction=0.1,
-        exploration_final_eps=0.02,
-        print_freq=10,
-        callback=callback
+        lr=1e-5,
+        max_timesteps=100000000,
+        buffer_size=100000,
+        exploration_fraction=0.5,
+        exploration_final_eps=0.01,
+        train_freq=4,
+        learning_starts=100000,
+        target_network_update_freq=1000,
+        gamma=0.99,
+        prioritized_replay=True
     )
-    print("Saving model to {}_model.pkl".format(map_name))
-    act.save("{}_model.pkl".format(map_name))
 
+    try:
+        print("Saving model to {}_model.pkl".format(map_name))
+        act.save("{}_model.pkl".format(map_name))
+    except:
+        print("Error saving model!")
+
+    print("Saving replay...")
     env.save_replay(map_name)
+
+    print("Closing environment...")
+    env.close()
 
 
 if __name__ == "__main__":
