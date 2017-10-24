@@ -1,6 +1,6 @@
 import sys
 
-import gflags as flags
+from absl import flags
 from baselines import deepq
 
 from sc2agents.env_wrappers import MoveToBeaconWrapper
