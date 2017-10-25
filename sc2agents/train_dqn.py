@@ -1,9 +1,10 @@
 import sys
 
+import gym
+# noinspection PyUnresolvedReferences
+import sc2gym.envs
 from absl import flags
 from baselines import deepq
-
-from sc2agents.env_wrappers import MoveToBeaconWrapper
 
 __author__ = 'Islam Elnabarawy'
 
@@ -14,7 +15,7 @@ def main():
     FLAGS(sys.argv)
 
     map_name = 'MoveToBeacon'
-    env = MoveToBeaconWrapper()
+    env = gym.make("SC2MoveToBeacon-v0")
 
     model = deepq.models.cnn_to_mlp(
         convs=[(32, 8, 4), (64, 4, 2), (64, 3, 1)],
